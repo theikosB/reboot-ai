@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f9fc">
+    <title>Reboot — Resume your work</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Markdown rendering and HTML sanitization -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+</head>
+
+<body>
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="brand" href="/" aria-label="Reboot home">
+                <span class="brand-mark">↻</span>
+                <span>REBOOT</span>
+            </a>
+            <span class="header-label">YOUR PROJECT REVIVAL TOOLKIT</span>
+        </header>
+
+        <main class="container">
+            <section class="hero">
+                <div class="hero-copy">
+                    <div class="eyebrow">
+                        <span class="eyebrow-dot"></span>
+                        YOUR PROJECT, RESTARTED
+                    </div>
+
+                    <h1>Every project deserves<br class="desktop-break">
+                        a second wind<span class="accent-period">.</span>
+                    </h1>
+
+                    <p class="hero-description">
+                        Forgotten what you were building? Reboot reviews
+                        your Git repository and turns the clues you left
+                        behind into a clear next step.
+                    </p>
+                </div>
+
+                <div class="form-card">
+                    <form method="POST" id="project-form">
+                        <label for="project_path">Local Git repository</label>
+
+                        <div class="input-wrap">
+                            <span class="input-icon" aria-hidden="true">⌘</span>
+                            <input
+                                id="project_path"
+                                name="project_path"
+                                type="text"
+                                placeholder="D:\CS Projects\my-project"
+                                value="{{ project_path }}"
+                                autocomplete="off"
+                                required
+                            >
+                        </div>
+
+                        <p class="field-hint">
+                            Enter the folder path of a repository on this computer.
+                        </p>
+
+                        <button class="primary-button" id="submit-button"
+                                type="submit">
+                            <span class="button-label">Inspect my project</span>
+                            <span class="button-arrow" aria-hidden="true">→</span>
+                        </button>
+                    </form>
+
+                    {% if error %}
+                        <div class="error-message" role="alert">
+                            <span aria-hidden="true">!</span>
+                            <p>{{ error }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="hero-footnote">
+                    <span aria-hidden="true">✳</span>
+                    Evidence from your repository. Actionable next steps.
+                </div>
+            </section>
+
+            {% if report %}
+                <section class="results-section" id="results">
+                    <div class="section-heading">
+                        <div>
+                            <div class="eyebrow">PROJECT REPORT</div>
+                            <h2>Your project at a glance</h2>
+                            <p class="project-path">{{ report.path }}</p>
+                        </div>
+
+                        <span class="report-badge">
+                            <span class="eyebrow-dot"></span>
+                            Analysis complete
+                        </span>
+                    </div>
+
+                    <div class="stats-grid">
+                        <article class="stat-card">
+                            <div class="stat-icon icon-blue" aria-hidden="true">▤</div>
+                            <div>
+                                <div class="stat-number">{{ report.files|length }}</div>
+                                <div class="stat-label">Tracked files shown</div>
+                            </div>
+                        </article>
+
+                        <article class="stat-card">
+                            <div class="stat-icon icon-purple" aria-hidden="true">↗</div>
+                            <div>
+                                <div class="stat-number">{{ report.commits|length }}</div>
+                                <div class="stat-label">Recent commits</div>
+                            </div>
+                        </article>
+
+                        <article class="stat-card">
+                            <div class="stat-icon icon-amber" aria-hidden="true">✓</div>
+                            <div>
+                                <div class="stat-number">{{ report.todos|length }}</div>
+                                <div class="stat-label">TODO markers</div>
+                            </div>
+                        </article>
+                    </div>
+
+                    {% if plan %}
+                        <article class="content-card plan-card">
+                            <div class="card-heading">
+                                <div>
+                                    <div class="eyebrow">YOUR COMEBACK PLAN</div>
+                                    <h3>Here's where to pick up</h3>
+                                </div>
+
+                                <button type="button" class="secondary-button"
+                                        id="copy-markdown">
+                                    <span aria-hidden="true">▣</span>
+                                    Copy Markdown
+                                </button>
+                            </div>
+
+                            <div id="plan-rendered" class="markdown-content"></div>
+                            <p class="copy-feedback" id="copy-feedback"
+                               role="status" aria-live="polite"></p>
+
+                            <!-- Original AI response, kept intact for copying -->
+                            <script id="plan-source" type="application/json">
+                                {{ plan | tojson }}
+                            </script>
+                        </article>
+                    {% endif %}
+
+                    <div class="details-grid">
+                        <article class="content-card">
+                            <div class="card-heading">
+                                <div>
+                                    <div class="eyebrow">PROJECT DOCUMENTATION</div>
+                                    <h3>README</h3>
+                                </div>
+                                <button type="button" class="text-button"
+                                        data-copy-source="readme-source">
+                                    Copy source
+                                </button>
+                            </div>
+
+                            <div id="readme-rendered"
+                                 class="markdown-content compact-markdown"></div>
+
+                            <script id="readme-source" type="application/json">
+                                {{ report.readme | tojson }}
+                            </script>
+                        </article>
+
+                        <article class="content-card">
+                            <div class="eyebrow">VERSION HISTORY</div>
+                            <h3>Recent commits</h3>
+
+                            {% if report.commits %}
+                                <ul class="activity-list">
+                                    {% for commit in report.commits %}
+                                        <li>
+                                            <span class="list-marker commit-marker"
+                                                  aria-hidden="true">↗</span>
+                                            <code>{{ commit }}</code>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="empty-state">No commits found.</p>
+                            {% endif %}
+                        </article>
+
+                        <article class="content-card">
+                            <div class="eyebrow">WORKING TREE</div>
+                            <h3>Uncommitted changes</h3>
+
+                            {% if report.status %}
+                                <ul class="activity-list">
+                                    {% for item in report.status %}
+                                        <li>
+                                            <span class="list-marker change-marker"
+                                                  aria-hidden="true">•</span>
+                                            <code>{{ item }}</code>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="empty-state">
+                                    Your working tree appears clean.
+                                </p>
+                            {% endif %}
+                        </article>
+
+                        <article class="content-card">
+                            <div class="eyebrow">POSSIBLE TODOs</div>
+                            <h3>Things left behind</h3>
+
+                            {% if report.todos %}
+                                <ul class="activity-list">
+                                    {% for todo in report.todos %}
+                                        <li>
+                                            <span class="list-marker todo-marker"
+                                                  aria-hidden="true">!</span>
+                                            <code>{{ todo }}</code>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="empty-state">
+                                    No TODO markers found in the inspected files.
+                                    Review the README and commit history for clues.
+                                </p>
+                            {% endif %}
+                        </article>
+                    </div>
+
+                    <p class="evidence-note">
+                        <span aria-hidden="true">ⓘ</span>
+                        This report is based on repository evidence. Suggested
+                        tasks are possibilities, not guaranteed issues.
+                    </p>
+                </section>
+            {% endif %}
+        </main>
+
+        <footer class="site-footer">
+            <a class="footer-brand" href="/">↻ REBOOT</a>
+            <p>Less remembering, more doing.</p>
+            <span>Made for the projects waiting to be picked up again.</span>
+        </footer>
+    </div>
+
+    <!-- Shown immediately after submitting the form -->
+    <div class="loading-overlay" id="loading-overlay"
+         aria-hidden="true">
+        <div class="loading-card" role="status" aria-live="polite">
+            <div class="loading-animation">
+                <div class="loading-ring"></div>
+                <span class="loading-logo">↻</span>
+            </div>
+
+            <div class="eyebrow">REBOOT IS AT WORK</div>
+            <h2 id="loading-title">Getting things ready…</h2>
+            <p id="loading-description">
+                Taking a look at your repository.
+            </p>
+
+            <div class="loading-track">
+                <div class="loading-track-fill"></div>
+            </div>
+
+            <div class="loading-footnote">
+                This can take a little while. Keep this tab open.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Render Markdown as safe HTML while retaining the original source.
+        function readJsonScript(id) {
+            const element = document.getElementById(id);
+            if (!element) return "";
+            try {
+                return JSON.parse(element.textContent);
+            } catch {
+                return "";
+            }
+        }
+
+        function renderMarkdown(source, targetId) {
+            const target = document.getElementById(targetId);
+            if (!target || !source) return;
+
+            if (typeof marked === "undefined" ||
+                typeof DOMPurify === "undefined") {
+                target.textContent = source;
+                return;
+            }
+
+            marked.setOptions({
+                gfm: true,
+                breaks: true
+            });
+
+            target.innerHTML = DOMPurify.sanitize(
+                marked.parse(source)
+            );
+        }
+
+        const planSource = readJsonScript("plan-source");
+        const readmeSource = readJsonScript("readme-source");
+
+        renderMarkdown(planSource, "plan-rendered");
+        renderMarkdown(readmeSource, "readme-rendered");
+
+        async function copyText(text, feedbackElement) {
+            try {
+                await navigator.clipboard.writeText(text);
+                feedbackElement.textContent = "Markdown source copied!";
+            } catch {
+                // Fallback for browsers where Clipboard API is unavailable.
+                const textarea = document.createElement("textarea");
+                textarea.value = text;
+                textarea.style.position = "fixed";
+                textarea.style.opacity = "0";
+                document.body.appendChild(textarea);
+                textarea.select();
+
+                try {
+                    const copied = document.execCommand("copy");
+                    feedbackElement.textContent = copied
+                        ? "Markdown source copied!"
+                        : "Copy failed. Please select and copy the source manually.";
+                } catch {
+                    feedbackElement.textContent =
+                        "Copy failed. Please select and copy the source manually.";
+                } finally {
+                    textarea.remove();
+                }
+            }
+        }
+
+        const copyButton = document.getElementById("copy-markdown");
+        if (copyButton) {
+            copyButton.addEventListener("click", () => {
+                copyText(
+                    planSource,
+                    document.getElementById("copy-feedback")
+                );
+            });
+        }
+
+        document.querySelectorAll("[data-copy-source]").forEach(button => {
+            button.addEventListener("click", () => {
+                const sourceId = button.dataset.copySource;
+                const source = readJsonScript(sourceId);
+                const originalLabel = button.textContent;
+
+                copyText(source, {
+                    set textContent(message) {
+                        button.textContent = message;
+                        setTimeout(() => {
+                            button.textContent = originalLabel;
+                        }, 1800);
+                    }
+                });
+            });
+        });
+
+        // Keep the user informed while the server processes the request.
+        const form = document.getElementById("project-form");
+        const overlay = document.getElementById("loading-overlay");
+        const loadingTitle = document.getElementById("loading-title");
+        const loadingDescription =
+            document.getElementById("loading-description");
+        const submitButton = document.getElementById("submit-button");
+
+        const loadingMessages = [
+            ["Inspecting your repository…",
+             "Finding tracked files and checking your working tree."],
+            ["Revisiting your project history…",
+             "Looking at recent commits and documentation."],
+            ["Connecting the dots…",
+             "Putting the available project evidence together."],
+            ["Preparing your restart brief…",
+             "Turning what we found into practical next steps."]
+        ];
+
+        let loadingInterval;
+
+        if (form) {
+            form.addEventListener("submit", () => {
+                if (!form.reportValidity()) return;
+
+                overlay.classList.add("is-visible");
+                overlay.setAttribute("aria-hidden", "false");
+                document.body.classList.add("is-loading");
+                submitButton.disabled = true;
+                submitButton.querySelector(".button-label").textContent =
+                    "Working on it…";
+
+                let index = 0;
+                loadingTitle.textContent = loadingMessages[0][0];
+                loadingDescription.textContent = loadingMessages[0][1];
+
+                loadingInterval = setInterval(() => {
+                    index = (index + 1) % loadingMessages.length;
+                    loadingTitle.textContent = loadingMessages[index][0];
+                    loadingDescription.textContent =
+                        loadingMessages[index][1];
+                }, 2600);
+            });
+        }
+
+        // Respect visitors who prefer reduced motion.
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            document.documentElement.classList.add("reduce-motion");
+        }
+    </script>
+</body>
+</html>
