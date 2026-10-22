@@ -1024,3 +1024,218 @@ input:focus {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
 }
+
+
+
+.research-search {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 16px;
+}
+
+.research-form {
+    display: flex;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.research-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border, #d1d5db);
+    border-radius: 10px;
+    font: inherit;
+}
+
+.paper-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.paper-card {
+    padding: 1.25rem;
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 12px;
+    background: var(--background, #fafafa);
+}
+
+.paper-card h3 {
+    margin-top: 0;
+}
+
+.paper-card a {
+    color: var(--accent, #2563eb);
+}
+
+.paper-meta {
+    color: var(--muted, #6b7280);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+    .research-form {
+        flex-direction: column;
+    }
+}
+
+
+
+/* ========================================
+   ARXIV RESEARCH SEARCH — LAYOUT FIX
+   ======================================== */
+
+#research-search {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 2.5rem 0;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    overflow-wrap: anywhere;
+}
+
+#research-search .section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 1.25rem;
+}
+
+#research-search .section-heading h2 {
+    margin: 0.4rem 0 0.6rem;
+    line-height: 1.3;
+}
+
+#research-search .section-heading p {
+    margin: 0;
+    max-width: 650px;
+    line-height: 1.7;
+}
+
+#research-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+    margin: 1.5rem 0 0.75rem;
+}
+
+#paper_query {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 54px;
+    box-sizing: border-box;
+    padding: 0 1rem;
+    border: 1px solid #d5dce7;
+    border-radius: 10px;
+    background: #fff;
+    color: #1f2937;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: normal;
+    outline-offset: 3px;
+}
+
+#paper_query::placeholder {
+    color: #929bad;
+    opacity: 1;
+}
+
+#research-form .primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: auto;
+    min-width: 165px;
+    min-height: 54px;
+    box-sizing: border-box;
+    padding: 0 1.25rem;
+    white-space: nowrap;
+    margin: 0;
+}
+
+#research-search .field-hint {
+    margin-top: 0.5rem;
+    line-height: 1.6;
+}
+
+#research-search .paper-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+#research-search .paper-card {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: clamp(1rem, 2.5vw, 1.5rem);
+    border: 1px solid #e5eaf1;
+    border-radius: 12px;
+    background: #fff;
+}
+
+#research-search .paper-card h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+#research-search .paper-card h3 a {
+    text-decoration: none;
+}
+
+#research-search .paper-card h3 a:hover {
+    text-decoration: underline;
+}
+
+#research-search .paper-meta {
+    margin: 0 0 1rem;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+#research-search .paper-abstract {
+    margin: 0 0 1rem;
+    font-size: 0.96rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+#research-search .paper-pdf-link {
+    display: inline-block;
+    margin-top: 0.25rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+    #research-search {
+        padding: 1.1rem;
+    }
+
+    #research-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #research-form .primary-button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    #research-search .paper-card {
+        padding: 1rem;
+    }
+}

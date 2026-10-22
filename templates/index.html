@@ -5,20 +5,196 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f7f9fc">
     <title>Reboot — Resume your work</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <!-- Markdown rendering and HTML sanitization -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-</head>
 
+    <!-- Scoped styles for the arXiv section, independent of the main stylesheet. -->
+    <style>
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        #research-search {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 2.5rem 0;
+            padding: clamp(1.25rem, 3vw, 2rem);
+            overflow-wrap: anywhere;
+        }
+
+        #research-search .research-heading {
+            display: block;
+            width: 100%;
+            margin: 0 0 1.25rem;
+        }
+
+        #research-search .research-heading .eyebrow {
+            margin-bottom: .5rem;
+        }
+
+        #research-search .research-heading h2 {
+            margin: 0 0 .65rem;
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            line-height: 1.25;
+            letter-spacing: -.025em;
+            overflow-wrap: normal;
+        }
+
+        #research-search .research-heading p {
+            max-width: 680px;
+            margin: 0;
+            line-height: 1.7;
+        }
+
+        #research-form {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: stretch;
+            gap: 12px;
+            width: 100%;
+            margin: 1.5rem 0 .5rem;
+        }
+
+        #paper_query {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            height: 56px;
+            box-sizing: border-box;
+            padding: 0 1rem;
+            border: 1px solid #d5dce7;
+            border-radius: 10px;
+            background: #fff;
+            color: #1f2937;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: normal;
+        }
+
+        #paper_query::placeholder {
+            color: #8993a5;
+            opacity: 1;
+        }
+
+        #research-form .primary-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .65rem;
+            width: auto;
+            min-width: 165px;
+            min-height: 56px;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0 1.25rem;
+            white-space: nowrap;
+        }
+
+        #research-search .research-hint {
+            margin: .65rem 0 0;
+            font-size: .9rem;
+            line-height: 1.6;
+        }
+
+        #research-search .research-error {
+            margin-top: 1rem;
+        }
+
+        #research-search .paper-list {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1rem;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        #research-search .paper-card {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            padding: clamp(1rem, 2.5vw, 1.5rem);
+            border: 1px solid #e5eaf1;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        #research-search .paper-card h3 {
+            margin: 0 0 .7rem;
+            font-size: 1.08rem;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        #research-search .paper-card h3 a,
+        #research-search .paper-pdf-link {
+            color: #315fce;
+            text-decoration: none;
+        }
+
+        #research-search .paper-card h3 a:hover,
+        #research-search .paper-pdf-link:hover {
+            text-decoration: underline;
+        }
+
+        #research-search .paper-meta {
+            margin: 0 0 .9rem;
+            color: #687386;
+            font-size: .9rem;
+            line-height: 1.65;
+            overflow-wrap: anywhere;
+        }
+
+        #research-search .paper-abstract {
+            margin: 0 0 1rem;
+            color: #3f4858;
+            font-size: .96rem;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+
+        #research-search .paper-pdf-link {
+            display: inline-block;
+            margin-top: .15rem;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            #research-search {
+                padding: 1.1rem;
+            }
+
+            #research-form {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            #research-form .primary-button {
+                width: 100%;
+                min-width: 0;
+            }
+        }
+    </style>
+</head>
 <body>
     <div class="page-shell">
         <header class="site-header">
             <a class="brand" href="/" aria-label="Reboot home">
-                <span class="brand-mark">↻</span>
+                <span class="brand-mark" aria-hidden="true">↻</span>
                 <span>REBOOT</span>
             </a>
             <span class="header-label">YOUR PROJECT REVIVAL TOOLKIT</span>
@@ -28,25 +204,19 @@
             <section class="hero">
                 <div class="hero-copy">
                     <div class="eyebrow">
-                        <span class="eyebrow-dot"></span>
+                        <span class="eyebrow-dot" aria-hidden="true"></span>
                         YOUR PROJECT, RESTARTED
                     </div>
-
-                    <h1>Every project deserves<br class="desktop-break">
-                        a second wind<span class="accent-period">.</span>
-                    </h1>
-
+                    <h1>Every project deserves<br class="desktop-break"> a second wind<span class="accent-period">.</span></h1>
                     <p class="hero-description">
-                        Forgotten what you were building? Reboot reviews
-                        your Git repository and turns the clues you left
-                        behind into a clear next step.
+                        Forgotten what you were building? Reboot reviews your Git repository
+                        and turns the clues you left behind into a clear next step.
                     </p>
                 </div>
 
                 <div class="form-card">
                     <form method="POST" id="project-form">
                         <label for="project_path">Local Git repository</label>
-
                         <div class="input-wrap">
                             <span class="input-icon" aria-hidden="true">⌘</span>
                             <input
@@ -59,19 +229,14 @@
                                 required
                             >
                         </div>
-
-                        <p class="field-hint">
-                            Enter the folder path of a repository on this computer.
-                        </p>
-
-                        <button class="primary-button" id="submit-button"
-                                type="submit">
+                        <p class="field-hint">Enter the folder path of a repository on this computer.</p>
+                        <button class="primary-button" id="submit-button" type="submit">
                             <span class="button-label">Inspect my project</span>
                             <span class="button-arrow" aria-hidden="true">→</span>
                         </button>
                     </form>
 
-                    {% if error %}
+                    {% if error and request.form.get("action") != "search_papers" %}
                         <div class="error-message" role="alert">
                             <span aria-hidden="true">!</span>
                             <p>{{ error }}</p>
@@ -85,6 +250,58 @@
                 </div>
             </section>
 
+            <section class="research-search content-card" id="research-search" aria-labelledby="research-title">
+                <div class="research-heading">
+                    <div class="eyebrow">LITERATURE DISCOVERY</div>
+                    <h2 id="research-title">Find related research</h2>
+                    <p>Search arXiv for papers related to your project or research question.</p>
+                </div>
+
+                <form method="POST" id="research-form">
+                    <input type="hidden" name="action" value="search_papers">
+                    <label class="sr-only" for="paper_query">Research topic</label>
+                    <input
+                        id="paper_query"
+                        name="paper_query"
+                        type="search"
+                        placeholder="Try dynamic graph algorithms or graph colouring…"
+                        value="{{ paper_query }}"
+                        required
+                    >
+                    <button class="primary-button" type="submit">
+                        <span class="button-label">Search arXiv</span>
+                        <span class="button-arrow" aria-hidden="true">→</span>
+                    </button>
+                </form>
+                <p class="research-hint">Search arXiv metadata and abstracts. Results link to the original papers.</p>
+
+                {% if error and request.form.get("action") == "search_papers" %}
+                    <div class="error-message research-error" role="alert">
+                        <span aria-hidden="true">!</span>
+                        <p>{{ error }}</p>
+                    </div>
+                {% endif %}
+
+                {% if papers %}
+                    <div class="paper-list">
+                        {% for paper in papers %}
+                            <article class="paper-card">
+                                <h3>
+                                    <a href="{{ paper.url }}" target="_blank" rel="noopener noreferrer">{{ paper.title }}</a>
+                                </h3>
+                                <p class="paper-meta">
+                                    {{ paper.authors | join(", ") }}{% if paper.published %} · {{ paper.published }}{% endif %}
+                                </p>
+                                <p class="paper-abstract">{{ paper.abstract }}</p>
+                                <a class="paper-pdf-link" href="{{ paper.pdf_url }}" target="_blank" rel="noopener noreferrer">Read paper PDF ↗</a>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% elif request.method == "POST" and request.form.get("action") == "search_papers" and not error %}
+                    <p class="empty-state">No papers found. Try broader or different keywords.</p>
+                {% endif %}
+            </section>
+
             {% if report %}
                 <section class="results-section" id="results">
                     <div class="section-heading">
@@ -93,9 +310,8 @@
                             <h2>Your project at a glance</h2>
                             <p class="project-path">{{ report.path }}</p>
                         </div>
-
                         <span class="report-badge">
-                            <span class="eyebrow-dot"></span>
+                            <span class="eyebrow-dot" aria-hidden="true"></span>
                             Analysis complete
                         </span>
                     </div>
@@ -108,7 +324,6 @@
                                 <div class="stat-label">Tracked files shown</div>
                             </div>
                         </article>
-
                         <article class="stat-card">
                             <div class="stat-icon icon-purple" aria-hidden="true">↗</div>
                             <div>
@@ -116,7 +331,6 @@
                                 <div class="stat-label">Recent commits</div>
                             </div>
                         </article>
-
                         <article class="stat-card">
                             <div class="stat-icon icon-amber" aria-hidden="true">✓</div>
                             <div>
@@ -133,22 +347,14 @@
                                     <div class="eyebrow">YOUR COMEBACK PLAN</div>
                                     <h3>Here's where to pick up</h3>
                                 </div>
-
-                                <button type="button" class="secondary-button"
-                                        id="copy-markdown">
+                                <button type="button" class="secondary-button" id="copy-markdown">
                                     <span aria-hidden="true">▣</span>
                                     Copy Markdown
                                 </button>
                             </div>
-
                             <div id="plan-rendered" class="markdown-content"></div>
-                            <p class="copy-feedback" id="copy-feedback"
-                               role="status" aria-live="polite"></p>
-
-                            <!-- Original AI response, kept intact for copying -->
-                            <script id="plan-source" type="application/json">
-                                {{ plan | tojson }}
-                            </script>
+                            <p class="copy-feedback" id="copy-feedback" role="status" aria-live="polite"></p>
+                            <script id="plan-source" type="application/json">{{ plan | tojson }}</script>
                         </article>
                     {% endif %}
 
@@ -159,30 +365,20 @@
                                     <div class="eyebrow">PROJECT DOCUMENTATION</div>
                                     <h3>README</h3>
                                 </div>
-                                <button type="button" class="text-button"
-                                        data-copy-source="readme-source">
-                                    Copy source
-                                </button>
+                                <button type="button" class="text-button" data-copy-source="readme-source">Copy source</button>
                             </div>
-
-                            <div id="readme-rendered"
-                                 class="markdown-content compact-markdown"></div>
-
-                            <script id="readme-source" type="application/json">
-                                {{ report.readme | tojson }}
-                            </script>
+                            <div id="readme-rendered" class="markdown-content compact-markdown"></div>
+                            <script id="readme-source" type="application/json">{{ report.readme | tojson }}</script>
                         </article>
 
                         <article class="content-card">
                             <div class="eyebrow">VERSION HISTORY</div>
                             <h3>Recent commits</h3>
-
                             {% if report.commits %}
                                 <ul class="activity-list">
                                     {% for commit in report.commits %}
                                         <li>
-                                            <span class="list-marker commit-marker"
-                                                  aria-hidden="true">↗</span>
+                                            <span class="list-marker commit-marker" aria-hidden="true">↗</span>
                                             <code>{{ commit }}</code>
                                         </li>
                                     {% endfor %}
@@ -195,42 +391,35 @@
                         <article class="content-card">
                             <div class="eyebrow">WORKING TREE</div>
                             <h3>Uncommitted changes</h3>
-
                             {% if report.status %}
                                 <ul class="activity-list">
                                     {% for item in report.status %}
                                         <li>
-                                            <span class="list-marker change-marker"
-                                                  aria-hidden="true">•</span>
+                                            <span class="list-marker change-marker" aria-hidden="true">•</span>
                                             <code>{{ item }}</code>
                                         </li>
                                     {% endfor %}
                                 </ul>
                             {% else %}
-                                <p class="empty-state">
-                                    Your working tree appears clean.
-                                </p>
+                                <p class="empty-state">Your working tree appears clean.</p>
                             {% endif %}
                         </article>
 
                         <article class="content-card">
                             <div class="eyebrow">POSSIBLE TODOs</div>
                             <h3>Things left behind</h3>
-
                             {% if report.todos %}
                                 <ul class="activity-list">
                                     {% for todo in report.todos %}
                                         <li>
-                                            <span class="list-marker todo-marker"
-                                                  aria-hidden="true">!</span>
+                                            <span class="list-marker todo-marker" aria-hidden="true">!</span>
                                             <code>{{ todo }}</code>
                                         </li>
                                     {% endfor %}
                                 </ul>
                             {% else %}
                                 <p class="empty-state">
-                                    No TODO markers found in the inspected files.
-                                    Review the README and commit history for clues.
+                                    No TODO markers found in the inspected files. Review the README and commit history for clues.
                                 </p>
                             {% endif %}
                         </article>
@@ -238,8 +427,7 @@
 
                     <p class="evidence-note">
                         <span aria-hidden="true">ⓘ</span>
-                        This report is based on repository evidence. Suggested
-                        tasks are possibilities, not guaranteed issues.
+                        This report is based on repository evidence. Suggested tasks are possibilities, not guaranteed issues.
                     </p>
                 </section>
             {% endif %}
@@ -252,33 +440,22 @@
         </footer>
     </div>
 
-    <!-- Shown immediately after submitting the form -->
-    <div class="loading-overlay" id="loading-overlay"
-         aria-hidden="true">
+    <!-- Shown while the project inspection form is being submitted. -->
+    <div class="loading-overlay" id="loading-overlay" aria-hidden="true">
         <div class="loading-card" role="status" aria-live="polite">
             <div class="loading-animation">
                 <div class="loading-ring"></div>
-                <span class="loading-logo">↻</span>
+                <span class="loading-logo" aria-hidden="true">↻</span>
             </div>
-
             <div class="eyebrow">REBOOT IS AT WORK</div>
             <h2 id="loading-title">Getting things ready…</h2>
-            <p id="loading-description">
-                Taking a look at your repository.
-            </p>
-
-            <div class="loading-track">
-                <div class="loading-track-fill"></div>
-            </div>
-
-            <div class="loading-footnote">
-                This can take a little while. Keep this tab open.
-            </div>
+            <p id="loading-description">Taking a look at your repository.</p>
+            <div class="loading-track"><div class="loading-track-fill"></div></div>
+            <div class="loading-footnote">This can take a little while. Keep this tab open.</div>
         </div>
     </div>
 
     <script>
-        // Render Markdown as safe HTML while retaining the original source.
         function readJsonScript(id) {
             const element = document.getElementById(id);
             if (!element) return "";
@@ -293,49 +470,39 @@
             const target = document.getElementById(targetId);
             if (!target || !source) return;
 
-            if (typeof marked === "undefined" ||
-                typeof DOMPurify === "undefined") {
+            if (typeof marked === "undefined" || typeof DOMPurify === "undefined") {
                 target.textContent = source;
                 return;
             }
 
-            marked.setOptions({
-                gfm: true,
-                breaks: true
-            });
-
-            target.innerHTML = DOMPurify.sanitize(
-                marked.parse(source)
-            );
+            marked.setOptions({ gfm: true, breaks: true });
+            target.innerHTML = DOMPurify.sanitize(marked.parse(source));
         }
 
         const planSource = readJsonScript("plan-source");
         const readmeSource = readJsonScript("readme-source");
-
         renderMarkdown(planSource, "plan-rendered");
         renderMarkdown(readmeSource, "readme-rendered");
 
         async function copyText(text, feedbackElement) {
+            if (!feedbackElement) return;
             try {
                 await navigator.clipboard.writeText(text);
                 feedbackElement.textContent = "Markdown source copied!";
             } catch {
-                // Fallback for browsers where Clipboard API is unavailable.
                 const textarea = document.createElement("textarea");
                 textarea.value = text;
                 textarea.style.position = "fixed";
                 textarea.style.opacity = "0";
                 document.body.appendChild(textarea);
                 textarea.select();
-
                 try {
                     const copied = document.execCommand("copy");
                     feedbackElement.textContent = copied
                         ? "Markdown source copied!"
                         : "Copy failed. Please select and copy the source manually.";
                 } catch {
-                    feedbackElement.textContent =
-                        "Copy failed. Please select and copy the source manually.";
+                    feedbackElement.textContent = "Copy failed. Please select and copy the source manually.";
                 } finally {
                     textarea.remove();
                 }
@@ -345,76 +512,66 @@
         const copyButton = document.getElementById("copy-markdown");
         if (copyButton) {
             copyButton.addEventListener("click", () => {
-                copyText(
-                    planSource,
-                    document.getElementById("copy-feedback")
-                );
+                copyText(planSource, document.getElementById("copy-feedback"));
             });
         }
 
         document.querySelectorAll("[data-copy-source]").forEach(button => {
-            button.addEventListener("click", () => {
-                const sourceId = button.dataset.copySource;
-                const source = readJsonScript(sourceId);
+            button.addEventListener("click", async () => {
+                const source = readJsonScript(button.dataset.copySource);
                 const originalLabel = button.textContent;
-
-                copyText(source, {
-                    set textContent(message) {
-                        button.textContent = message;
-                        setTimeout(() => {
-                            button.textContent = originalLabel;
-                        }, 1800);
-                    }
-                });
+                try {
+                    await navigator.clipboard.writeText(source);
+                    button.textContent = "Copied!";
+                } catch {
+                    const textarea = document.createElement("textarea");
+                    textarea.value = source;
+                    textarea.style.position = "fixed";
+                    textarea.style.opacity = "0";
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    const copied = document.execCommand("copy");
+                    textarea.remove();
+                    button.textContent = copied ? "Copied!" : "Copy failed";
+                }
+                setTimeout(() => { button.textContent = originalLabel; }, 1800);
             });
         });
 
-        // Keep the user informed while the server processes the request.
-        const form = document.getElementById("project-form");
+        // Only show the repository-analysis overlay for the project form.
+        const projectForm = document.getElementById("project-form");
         const overlay = document.getElementById("loading-overlay");
         const loadingTitle = document.getElementById("loading-title");
-        const loadingDescription =
-            document.getElementById("loading-description");
+        const loadingDescription = document.getElementById("loading-description");
         const submitButton = document.getElementById("submit-button");
-
         const loadingMessages = [
-            ["Inspecting your repository…",
-             "Finding tracked files and checking your working tree."],
-            ["Revisiting your project history…",
-             "Looking at recent commits and documentation."],
-            ["Connecting the dots…",
-             "Putting the available project evidence together."],
-            ["Preparing your restart brief…",
-             "Turning what we found into practical next steps."]
+            ["Inspecting your repository…", "Finding tracked files and checking your working tree."],
+            ["Revisiting your project history…", "Looking at recent commits and documentation."],
+            ["Connecting the dots…", "Putting the available project evidence together."],
+            ["Preparing your restart brief…", "Turning what we found into practical next steps."]
         ];
 
-        let loadingInterval;
-
-        if (form) {
-            form.addEventListener("submit", () => {
-                if (!form.reportValidity()) return;
-
+        if (projectForm && overlay && submitButton) {
+            projectForm.addEventListener("submit", () => {
+                if (!projectForm.reportValidity()) return;
                 overlay.classList.add("is-visible");
                 overlay.setAttribute("aria-hidden", "false");
                 document.body.classList.add("is-loading");
                 submitButton.disabled = true;
-                submitButton.querySelector(".button-label").textContent =
-                    "Working on it…";
+                const buttonLabel = submitButton.querySelector(".button-label");
+                if (buttonLabel) buttonLabel.textContent = "Working on it…";
 
                 let index = 0;
                 loadingTitle.textContent = loadingMessages[0][0];
                 loadingDescription.textContent = loadingMessages[0][1];
-
-                loadingInterval = setInterval(() => {
+                setInterval(() => {
                     index = (index + 1) % loadingMessages.length;
                     loadingTitle.textContent = loadingMessages[index][0];
-                    loadingDescription.textContent =
-                        loadingMessages[index][1];
+                    loadingDescription.textContent = loadingMessages[index][1];
                 }, 2600);
             });
         }
 
-        // Respect visitors who prefer reduced motion.
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             document.documentElement.classList.add("reduce-motion");
         }
