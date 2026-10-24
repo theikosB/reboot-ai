@@ -3,8 +3,36 @@ from pathlib import Path
 import subprocess
 
 
+SOURCE_EXTENSIONS = {
+    ".py", ".js", ".ts", ".tsx", ".jsx",
+    ".java", ".cpp", ".cc", ".c", ".h", ".hpp",
+    ".rs", ".go", ".r", ".jl", ".tex",
+}
+
+TEXT_EXTENSIONS = SOURCE_EXTENSIONS | {
+    ".md", ".txt", ".html", ".css", ".toml",
+    ".yaml", ".yml", ".json",
+}
+
+EXCLUDED_DIRS = {
+    ".git", ".venv", "venv", "node_modules",
+    "__pycache__", "dist", "build", ".next",
+    ".pytest_cache", ".mypy_cache", "coverage",
+}
+
+EXCLUDED_NAMES = {
+    ".env", ".env.local", ".env.production",
+    "id_rsa", "id_ed25519", "credentials.json",
+    "secrets.json", "package-lock.json",
+    "yarn.lock", "pnpm-lock.yaml",
+}
+
+MAX_FILE_BYTES = 100_000
+MAX_SOURCE_FILES = 12
+MAX_SOURCE_CHARS = 30_000
+
+
 def inspect_project(project_path: str) -> dict:
-    """Collect a small, safe-to-display summary of a local Git project."""
     root = Path(project_path).expanduser().resolve()
 
     if not root.is_dir():
@@ -18,50 +46,105 @@ def inspect_project(project_path: str) -> dict:
             ["git", "-C", str(root), *args],
             capture_output=True,
             text=True,
-            timeout=10,
+            timeout=15,
             check=False,
         )
-        if result.returncode != 0:
-            return ""
-        return result.stdout.strip()
+        return result.stdout.strip() if result.returncode == 0 else ""
 
     readme = ""
     for name in ("README.md", "README.rst", "README.txt", "README"):
-        file = root / name
-        if file.is_file():
-            readme = file.read_text(encoding="utf-8", errors="replace")[:5000]
+        path = root / name
+        if path.is_file():
+            readme = path.read_text(
+                encoding="utf-8", errors="replace"
+            )[:6000]
             break
 
-    files = git("ls-files")
-    file_list = files.splitlines()[:100] if files else []
+    # Includes tracked and untracked, non-ignored files.
+    raw_files = git(
+        "ls-files", "--cached", "--others",
+        "--exclude-standard", "-z"
+    )
+
+    file_list = []
+    for relative in raw_files.split("\0"):
+        if not relative:
+            continue
+
+        path = Path(relative)
+
+        if any(part in EXCLUDED_DIRS for part in path.parts):
+            continue
+
+        if path.name in EXCLUDED_NAMES:
+            continue
+
+        if path.name.startswith(".env.") and path.name != ".env.example":
+            continue
+
+        full_path = root / path
+
+        if full_path.is_symlink() or not full_path.is_file():
+            continue
+
+        if full_path.stat().st_size > MAX_FILE_BYTES:
+            continue
+
+        file_list.append(relative)
+
+    file_list = sorted(set(file_list))[:150]
 
     commits = git("log", "-5", "--pretty=format:%h | %s")
     status = git("status", "--short")
-    todo_lines = []
+
+    todos = []
+    source_files = []
+    total_source_chars = 0
 
     for relative in file_list:
-        if len(todo_lines) >= 30:
-            break
+        path = root / relative
 
-        file_path = root / relative
-        if not file_path.is_file() or file_path.suffix.lower() not in {
-            ".py", ".md", ".txt", ".js", ".ts", ".html", ".css",
-            ".java", ".cpp", ".h", ".tex", ".r", ".jl"
-        }:
+        if path.suffix.lower() not in TEXT_EXTENSIONS:
             continue
 
         try:
-            lines = file_path.read_text(
+            content = path.read_text(
                 encoding="utf-8", errors="replace"
-            ).splitlines()
+            )
         except OSError:
             continue
 
-        for number, line in enumerate(lines, start=1):
-            if any(marker in line.upper() for marker in ("TODO", "FIXME", "XXX")):
-                todo_lines.append(f"{relative}:{number}: {line.strip()[:180]}")
-                if len(todo_lines) >= 30:
+        for number, line in enumerate(content.splitlines(), 1):
+            if any(
+                marker in line.upper()
+                for marker in ("TODO", "FIXME", "XXX")
+            ):
+                todos.append(
+                    f"{relative}:{number}: {line.strip()[:180]}"
+                )
+                if len(todos) >= 30:
                     break
+
+        if (
+            path.suffix.lower() in SOURCE_EXTENSIONS
+            and len(source_files) < MAX_SOURCE_FILES
+            and total_source_chars < MAX_SOURCE_CHARS
+        ):
+            remaining = MAX_SOURCE_CHARS - total_source_chars
+            excerpt = content[:min(remaining, 3500)]
+
+            numbered = "\n".join(
+                f"{i}: {line}"
+                for i, line in enumerate(excerpt.splitlines(), 1)
+            )
+
+            source_files.append({
+                "path": relative,
+                "content": numbered,
+                "truncated": len(excerpt) < len(content),
+            })
+
+            total_source_chars += len(excerpt)
 
     return {
         "path": str(root),
@@ -69,5 +152,6 @@ def inspect_project(project_path: str) -> dict:
         "files": file_list,
         "commits": commits.splitlines() if commits else [],
         "status": status.splitlines() if status else [],
-        "todos": todo_lines,
+        "todos": todos[:30],
+        "source_files": source_files,
     }
